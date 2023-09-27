@@ -46,6 +46,7 @@
   </template>
   
   <script>
+  import axios from 'axios';
   export default {
     data() {
       return {
@@ -78,27 +79,56 @@
       };
     },
     methods: {
-      mapClicked(event) {
-        const clickedId = event.target.id;
-        const zone = this.zones.find((z) => z.id === clickedId);
-        if (zone) {
-          zone.selected = !zone.selected;
-          this.$emit('zone-selected', zone);
-        }
-      },
-      circleClicked(circleId, event) {
-        event.stopPropagation(); 
-        const circle = this.circles.find(c => c.id === circleId);
-        if (circle) {
-          circle.selected = !circle.selected;
-          this.$emit('circle-selected', circle);
-        }
-      },
-      pointClicked(pointId, event) {
-        event.stopPropagation(); 
-        this.$emit('point-selected', this.points.find(p => p.id === pointId));
+  async mapClicked(event) {
+    const clickedId = event.target.id;
+    const zone = this.zones.find((z) => z.id === clickedId);
+    if (zone) {
+      zone.selected = !zone.selected;
+      this.$emit('zone-selected', zone);
+      try {
+        await axios.post('http://localhost:3000/reserve', {
+          id: zone.id,
+          type: 'zone',
+          reservedBy: 'nom de la personne',
+        });
+      } catch (error) {
+        console.error('Erreur lors de la réservation', error);
       }
-    },
+    }
+  },
+  async circleClicked(circleId, event) {
+    event.stopPropagation();
+    const circle = this.circles.find(c => c.id === circleId);
+    if (circle) {
+      circle.selected = !circle.selected;
+      this.$emit('circle-selected', circle);
+      try {
+        await axios.post('http://localhost:3000/reserve', {
+          id: circle.id,
+          type: 'circle',
+          reservedBy: 'nom de la personne',
+        });
+      } catch (error) {
+        console.error('Erreur lors de la réservation', error);
+      }
+    }
+  },
+  async pointClicked(pointId, event) {
+    event.stopPropagation();
+    const point = this.points.find(p => p.id === pointId);
+    this.$emit('point-selected', point);
+    try {
+      await axios.post('http://localhost:3000/reserve', {
+        id: point.id,
+        type: 'point',
+        reservedBy: 'nom de la personne',
+      });
+    } catch (error) {
+      console.error('Erreur lors de la réservation', error);
+    }
+  }
+},
+    
   };
   </script>
   
